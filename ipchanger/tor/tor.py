@@ -9,7 +9,6 @@ from stem.process import launch_tor_with_config
 from stem.util import term
 from stem.control import Controller
 from stem import Signal
-from ipchanger.tor.ip_analyzer import IPAnalyzer
 
 logger = logging.getLogger(__file__)
 
@@ -89,7 +88,6 @@ class Tor:
             "ControlPort": str(self.control_port),
             "DataDirectory": self.data_directory,
             "ExitRelay": str(0),
-            "ExitNodes": '{ru}'
         }
 
         return self.config

@@ -1,6 +1,7 @@
 import configparser
 from ipchanger.definitions import ROOT_DIR
 from ipchanger.tor.tor import Tor
+from ipchanger.tor.ip_analyzer import IPAnalyzer
 
 
 def main():
@@ -14,12 +15,18 @@ def main():
     tor = Tor(socks_port=socks_port, control_port=control_port)
     tor_p1 = tor.launch()
 
-    print(tor_p1.get_current_ip())
+    analyzer = IPAnalyzer()
+
+    current_ip = tor_p1.get_current_ip()
+    analyzer.set_ip(current_ip)
+    print(analyzer.get_country_name())
 
     for i in range(0, 3):
 
-        tor.renew_ip()
-
+        new_ip = tor.renew_ip()
+        analyzer.set_ip(new_ip)
+        print(analyzer.get_country_name())
+        
     print(tor_p1.get_used_ips())
 
 
