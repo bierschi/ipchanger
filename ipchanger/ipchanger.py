@@ -1,7 +1,7 @@
 import configparser
-from ipchanger.definitions import ROOT_DIR
-from ipchanger.tor.tor import Tor
-from ipchanger.tor.ip_analyzer import IPAnalyzer
+from definitions import ROOT_DIR
+from tor.tor import Tor
+from tor.ip_analyzer import IPAnalyzer
 
 
 def main():
@@ -26,7 +26,7 @@ def main():
         new_ip = tor.renew_ip()
         analyzer.set_ip(new_ip)
         print(analyzer.get_country_name())
-        
+
     print(tor_p1.get_used_ips())
 
 

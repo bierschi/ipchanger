@@ -1,4 +1,5 @@
 import requests
+from requests.exceptions import ConnectionError
 import logging
 from os import path
 from time import sleep
@@ -9,8 +10,6 @@ from stem.process import launch_tor_with_config
 from stem.util import term
 from stem.control import Controller
 from stem import Signal
-
-logger = logging.getLogger(__file__)
 
 
 class Tor:
@@ -31,11 +30,14 @@ class Tor:
         self.socks_port = socks_port
         self.control_port = control_port
 
-        self.config = None
+        self.config = dict()
         self.process = None
         self.controller = None
 
-        self.http_proxy = "http://127.0.0.1:8118"
+        self.http_proxies = {
+            'http': 'http://127.0.0.1:8118',
+            'https': 'https://127.0.0.1:8118'
+        }
 
         self.ip_request_str = "http://icanhazip.com/"
         self.real_host_ip = requests.get(self.ip_request_str).text
@@ -47,20 +49,22 @@ class Tor:
         """destructor
 
         """
-        self.controller.close()
-        self.process.terminate()
-        self.process.wait()
+        if (self.controller and self.process) is not None:
+            self.controller.close()
+            self.process.terminate()
+            self.process.wait()
 
         if path.exists(self.data_directory):
             rmtree(self.data_directory)
 
     def launch(self):
+        """launches a tor process with default configuration
+
+        :return: self object
         """
 
-        :return:
-        """
         self.process = launch_tor_with_config(
-            config=self.create_default_cfg(),
+            config=self.create_config(),
             init_msg_handler=self.__print_bootstrap_lines,
         )
 
@@ -68,6 +72,15 @@ class Tor:
         self.controller.authenticate()
 
         return self
+
+    def restart(self):
+        """
+
+        :return:
+        """
+
+        self.kill_process()
+        self.launch()
 
     def kill_process(self):
         """kills current tor process
@@ -77,18 +90,26 @@ class Tor:
             self.logger.info("Killing tor process")
             self.process.kill()
 
-    def create_default_cfg(self):
-        """
+    def create_config(self, exit_nodes=False):
+        """creates a default config dictionary
 
-        :return:
+        :return: dict, configuration settings
         """
-        self.config = {
+        # default config
+        self.config.update({
 
             "SOCKSPort": str(self.socks_port),
             "ControlPort": str(self.control_port),
             "DataDirectory": self.data_directory,
             "ExitRelay": str(0),
-        }
+        })
+
+        if exit_nodes:
+            self.config.update({
+
+                "ExitNodes": '{ru}'
+
+            })
 
         return self.config
 
@@ -148,11 +169,15 @@ class Tor:
 
         :return: String: current ip address
         """
+        try:
 
-        current_ip = requests.get(url=self.ip_request_str, proxies={'http': self.http_proxy}).text.rstrip()
-        self.__save_used_ips(ip_address=current_ip)
+            current_ip = requests.get(url=self.ip_request_str, proxies=self.http_proxies).text.rstrip()
+            self.__save_used_ips(ip_address=current_ip)
 
-        return current_ip
+            return current_ip
+
+        except ConnectionRefusedError as ex:
+            self.logger.error("ConnectionRefusedError: %s" % ex)
 
     def renew_ip(self):
         """renew current ip address, this can take a while

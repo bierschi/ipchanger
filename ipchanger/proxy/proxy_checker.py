@@ -14,8 +14,7 @@ class ProxyChecker:
     def __init__(self, timeout=1):
         self.logger = logging.getLogger(__file__)
 
-        self.grabber = ProxyGrabber()
-        self.test_url = "http://www.google.com"
+        self.ping_url = "http://www.google.com"
 
         if isinstance(timeout, (int, float)):
             self.timeout = timeout
@@ -31,14 +30,22 @@ class ProxyChecker:
     def __del__(self):
         pass
 
-    def run(self, size=20):
+    def run(self, proxies, size=20):
         """starts the proxy check routine
 
         """
-        self.__process_handler(size=size)
 
-        [x.start() for x in self.processes]
-        [x.join() for x in self.processes]
+        if isinstance(proxies, list):
+            # TODO check format ip:port
+
+            self.proxy_list = proxies
+            self.__process_handler(size=size)
+
+            [x.start() for x in self.processes]
+            [x.join() for x in self.processes]
+
+        else:
+            raise TypeError("'proxies must be type of list, containing proxies in format ['ip:port']")
 
     def get_proxies_up(self):
         """returns all proxies which are alive
@@ -60,7 +67,6 @@ class ProxyChecker:
         :return:lists in list, multiple sublists with size 'size'
         """
 
-        self.proxy_list = self.grabber.get_proxies()
         print("length of complete proxy list: %d" % len(self.proxy_list))
         return [self.proxy_list[x:x+size] for x in range(0, len(self.proxy_list), size)]
 
@@ -85,7 +91,7 @@ class ProxyChecker:
             print("Request %d" % i)
             try:
 
-                response = requests.get(url=self.test_url, proxies={"http": proxy, "https": proxy, "socks": proxy},
+                response = requests.get(url=self.ping_url, proxies={"http": proxy, "https": proxy, "socks": proxy},
                                         timeout=self.timeout)
 
                 if response.status_code == 200:
@@ -109,8 +115,9 @@ class ProxyChecker:
 
 
 if __name__ == '__main__':
+    grabber = ProxyGrabber()
     proxyChecker = ProxyChecker(timeout=1)
-    proxyChecker.run(size=50)
+    proxyChecker.run(size=50, proxies=grabber.get_proxies(limit=50))
     up = proxyChecker.get_proxies_up()
     print(up)
     print(len(up))

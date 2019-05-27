@@ -20,7 +20,7 @@ class ProxyGrabber:
 
         self.proxy_list = list()
 
-    def get_proxies(self):
+    def get_proxies(self, limit=None):
         """get a list of all proxies, format: ip:port
 
         :return:list, ip:port as a string
@@ -32,7 +32,10 @@ class ProxyGrabber:
         self.proxy_list.extend(fp_proxies)
         self.proxy_list.extend(ipadress_proxies)
 
-        return self.proxy_list
+        if limit is not None:
+            return self.proxy_list[:limit]
+        else:
+            return self.proxy_list
 
     def get_anonymous_proxies(self):
         """get a list of anonymous proxies
@@ -115,6 +118,6 @@ class ProxyGrabber:
 
 if __name__ == '__main__':
     grabber = ProxyGrabber()
-    proxies = grabber.get_proxies()
+    proxies = grabber.get_proxies(limit=10)
     print(proxies)
-
+    print(len(proxies))
