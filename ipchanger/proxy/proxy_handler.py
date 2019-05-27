@@ -10,8 +10,11 @@ class ProxyHandler:
             ProxyHandler()
     """
     def __init__(self):
+
+        # load proxy classes
         self.grabber = ProxyGrabber()
         self.checker = ProxyChecker()
+        self.proxy_db = ProxyDB()
 
     def __del__(self):
         pass

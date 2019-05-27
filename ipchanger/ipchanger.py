@@ -1,7 +1,7 @@
 import configparser
 from definitions import ROOT_DIR
 from tor.tor import Tor
-from tor.ip_analyzer import IPAnalyzer
+from utils.ip_analyzer import IPAnalyzer
 
 
 def main():
