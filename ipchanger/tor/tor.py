@@ -1,5 +1,4 @@
 import requests
-from requests.exceptions import ConnectionError
 import logging
 from os import path
 from time import sleep
@@ -57,30 +56,39 @@ class Tor:
         if path.exists(self.data_directory):
             rmtree(self.data_directory)
 
-    def launch(self):
-        """launches a tor process with default configuration
+    def launch(self, exit_nodes=None):
+        """launches a tor process with configuration dictionary
 
         :return: self object
         """
 
-        self.process = launch_tor_with_config(
-            config=self.create_config(),
-            init_msg_handler=self.__print_bootstrap_lines,
-        )
+        if exit_nodes is None:
+            print("starting tor process with default configuration")
+            self.process = launch_tor_with_config(
+                config=self.create_config(),
+                init_msg_handler=self.__print_bootstrap_lines,
+            )
+
+        else:
+            print("starting tor process with defined exit nodes")
+            self.process = launch_tor_with_config(
+                config=self.create_config(exit_nodes=exit_nodes),
+                init_msg_handler=self.__print_bootstrap_lines,
+            )
 
         self.controller = Controller.from_port(port=self.control_port)
         self.controller.authenticate()
 
         return self
 
-    def restart(self):
-        """
+    def restart(self, exit_nodes=None):
+        """restart the tor process
 
-        :return:
         """
 
         self.kill_process()
-        self.launch()
+        self.__used_ips = list()
+        self.launch(exit_nodes=exit_nodes)
 
     def kill_process(self):
         """kills current tor process
@@ -90,9 +98,10 @@ class Tor:
             self.logger.info("Killing tor process")
             self.process.kill()
 
-    def create_config(self, exit_nodes=False):
-        """creates a default config dictionary
+    def create_config(self, exit_nodes=None):
+        """creates a config dictionary
 
+        :param exit_nodes: str with country codes in form: '{gb}, {ru}, {de}, {us}'
         :return: dict, configuration settings
         """
         # default config
@@ -104,29 +113,23 @@ class Tor:
             "ExitRelay": str(0),
         })
 
-        if exit_nodes:
-            self.config.update({
+        if exit_nodes is not None:
+            if isinstance(exit_nodes, str):
 
-                "ExitNodes": '{ru}'
+                self.config.update({
 
-            })
+                    "ExitNodes": exit_nodes
+
+                })
+            else:
+                raise TypeError("'exit_nodes' must be type of string in form: '{us}, {ru}, {de}'")
 
         return self.config
 
-    def update_cfg(self):
-        """
-
-        :return:
-        """
-
-        self.config.update({
-            "ExitNodes": '{ru}'
-        })
-
     def __print_bootstrap_lines(self, line):
-        """
+        """sets up a msg handler for init
 
-        :return:
+        :param line: logger output
         """
         if "Bootstrapped" in line:
             self.logger.debug("[%05d] Tor logger outputs: %s", self.socks_port, line)
@@ -193,18 +196,25 @@ class Tor:
             self.__trigger_new_ip()
             new_ip = self.get_current_ip()
 
-        print("renewed the ip address to: %s" % (new_ip))
+        print("renewed the ip address to: %s" % new_ip)
 
         return new_ip
 
 
 if __name__ == '__main__':
+    from utils.ip_analyzer import IPAnalyzer
+    ip_anal = IPAnalyzer()
     tor = Tor(socks_port=9050, control_port=9051)
     p1 = tor.launch()
     i =0
+    j = 0
+
     while i < 3:
+        curr_ip = p1.get_current_ip()
+        ip_anal.set_ip(ip_address=curr_ip)
+        print("curr_ip : %s , analyze country: %s" % (curr_ip, ip_anal.get_country_name()))
         p1.renew_ip()
         sleep(2)
         i += 1
+
     print(p1.get_used_ips())
-    p1.kill_process()
