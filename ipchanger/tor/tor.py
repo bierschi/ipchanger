@@ -17,14 +17,14 @@ class Tor:
     USAGE:
             Tor(socks_port=9050, control_port=9051)
     """
-    def __init__(self, socks_port=9050, control_port=9051):
+    def __init__(self, socks_port=9050, control_port=9051, http_proxy='127.0.0.1:8118', https_proxy='127.0.0.1:8118'):
         """
 
         :param socks_port: define socks port, default 9050
         :param control_port: define control port, default 9051
         """
 
-        self.logger = logging.getLogger(__file__)
+        self.logger = logging.getLogger('ipchanger')
 
         self.socks_port = socks_port
         self.control_port = control_port
@@ -33,13 +33,13 @@ class Tor:
         self.process = None
         self.controller = None
 
-        self.http_proxies = {
-            'http': 'http://127.0.0.1:8118',
-            'https': 'https://127.0.0.1:8118'
-        }
+        self.http_proxies = {'http' : http_proxy,
+                             'https': https_proxy}
 
         self.ip_request_str = "http://icanhazip.com/"
         self.real_host_ip = requests.get(self.ip_request_str).text
+        self.logger.info('real host ip: %s' % self.real_host_ip)
+
         self.__used_ips = list()
 
         self.data_directory = mkdtemp()
@@ -63,14 +63,14 @@ class Tor:
         """
 
         if exit_nodes is None:
-            print("starting tor process with default configuration")
+            self.logger.info("starting tor process with default configuration")
             self.process = launch_tor_with_config(
                 config=self.create_config(),
                 init_msg_handler=self.__print_bootstrap_lines,
             )
 
         else:
-            print("starting tor process with defined exit nodes")
+            self.logger.info("starting tor process with defined exit nodes")
             self.process = launch_tor_with_config(
                 config=self.create_config(exit_nodes=exit_nodes),
                 init_msg_handler=self.__print_bootstrap_lines,
@@ -84,8 +84,9 @@ class Tor:
     def restart(self, exit_nodes=None):
         """restart the tor process
 
+        :param exit_nodes: str with country codes in form: '{gb}, {ru}, {us}'
         """
-
+        self.logger.info("restart tor process")
         self.kill_process()
         self.__used_ips = list()
         self.launch(exit_nodes=exit_nodes)
@@ -95,7 +96,7 @@ class Tor:
 
         """
         if self.process:
-            self.logger.info("Killing tor process")
+            self.logger.info("killing tor process")
             self.process.kill()
 
     def create_config(self, exit_nodes=None):
@@ -148,10 +149,11 @@ class Tor:
             with self.controller as controller:
                 controller.authenticate()
                 controller.signal(Signal.NEWNYM)
+                self.logger.info("trigger new ip address from tor relay")
                 sleep(1)
 
         except Exception as ex:
-            print("Exception while trying to trigger new ip: %s" % ex)
+            self.logger.error("Exception while trying to trigger new ip: %s" % ex)
 
     def __save_used_ips(self, ip_address):
         """save already used ip addresses in a list
@@ -196,7 +198,7 @@ class Tor:
             self.__trigger_new_ip()
             new_ip = self.get_current_ip()
 
-        print("renewed the ip address to: %s" % new_ip)
+        self.logger.info("renewed the ip address to: %s" % new_ip)
 
         return new_ip
 

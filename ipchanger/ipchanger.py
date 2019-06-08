@@ -1,32 +1,28 @@
 import configparser
-import logging
 from definitions import ROOT_DIR
 from tor.tor import Tor
 from utils.ip_analyzer import IPAnalyzer
+from utils.logger import Logger
 from time import sleep
-
-
-verbose = False
-"""
-if verbose:
-    logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.DEBUG)
-    logging.info("Verbose output.")
-else:
-    logging.basicConfig(format="%(levelname)s: %(message)s")
-
-"""
 
 
 def main():
 
+    # set up logger instance
+    logger = Logger()
+    logger.info("start application ipchanger")
+
+    # set up configurations
     config = configparser.ConfigParser()
     config.read(ROOT_DIR + '/cfg/config.ini')
 
     socks_port = config.getint('tor', 'socks_port')
     control_port = config.getint('tor', 'control_port')
+    http_proxy = config.get('tor', 'http_proxy')
+    https_proxy = config.get('tor', 'https_proxy')
 
     analyzer = IPAnalyzer()
-    tor = Tor(socks_port=socks_port, control_port=control_port)
+    tor = Tor(socks_port=socks_port, control_port=control_port, http_proxy=http_proxy, https_proxy=https_proxy)
     p1 = tor.launch()
     i = 0
     j = 0
