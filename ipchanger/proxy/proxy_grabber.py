@@ -10,7 +10,8 @@ class ProxyGrabber:
             ProxyGrabber()
     """
     def __init__(self):
-        self.logger = logging.getLogger(__file__)
+        self.logger = logging.getLogger('ipchanger')
+        self.logger.info("create class ProxyGrabber")
 
         self.free_proxy_url      = 'https://free-proxy-list.net/'
         self.anonymous_proxy_url = 'https://free-proxy-list.net/anonymous-proxy.html'
@@ -33,8 +34,10 @@ class ProxyGrabber:
         self.proxy_list.extend(ipadress_proxies)
 
         if limit is not None:
+            self.logger.info("get %d proxies" % len(self.proxy_list[:limit]))
             return self.proxy_list[:limit]
         else:
+            self.logger.info("get %d proxies" % len(self.proxy_list))
             return self.proxy_list
 
     def get_anonymous_proxies(self):
@@ -72,11 +75,11 @@ class ProxyGrabber:
         :return:
         """
         proxy_sale_url = 'http://free.proxy-sale.com/'
-        response = requests.get(url = proxy_sale_url + '?pg-&port[]=http&type[]=an&type[]=el')
-        print(response.text)
+        response = requests.get(url=proxy_sale_url + '?pg-&port[]=http&type[]=an&type[]=el')
+
         soup = BeautifulSoup(response.text, "lxml")
         export_url = soup.find(class_='ico-export-tre').a['href']
-        ip_list = requests.get(url = proxy_sale_url + export_url).text.split('\r\n')
+        ip_list = requests.get(url=proxy_sale_url + export_url).text.split('\r\n')
 
         return ip_list[:-1]
 

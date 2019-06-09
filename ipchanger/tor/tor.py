@@ -25,6 +25,7 @@ class Tor:
         """
 
         self.logger = logging.getLogger('ipchanger')
+        self.logger.info('create class Tor')
 
         self.socks_port = socks_port
         self.control_port = control_port
@@ -133,7 +134,7 @@ class Tor:
         :param line: logger output
         """
         if "Bootstrapped" in line:
-            self.logger.debug("[%05d] Tor logger outputs: %s", self.socks_port, line)
+            self.logger.debug("Tor logger outputs: %s" % line)
             print(term.format(line, term.Color.BLUE))
 
         if "100%" in line:
@@ -149,7 +150,6 @@ class Tor:
             with self.controller as controller:
                 controller.authenticate()
                 controller.signal(Signal.NEWNYM)
-                self.logger.info("trigger new ip address from tor relay")
                 sleep(1)
 
         except Exception as ex:

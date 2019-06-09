@@ -1,4 +1,5 @@
 import configparser
+import logging
 from definitions import ROOT_DIR
 from tor.tor import Tor
 from utils.ip_analyzer import IPAnalyzer
@@ -9,10 +10,11 @@ from time import sleep
 def main():
 
     # set up logger instance
-    logger = Logger()
+    Logger(name='ipchanger', level=logging.INFO, log_folder='/var/log/', debug=True)
+    logger = logging.getLogger('ipchanger')
     logger.info("start application ipchanger")
 
-    # set up configurations
+    # set up configuration attributes
     config = configparser.ConfigParser()
     config.read(ROOT_DIR + '/cfg/config.ini')
 

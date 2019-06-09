@@ -1,5 +1,6 @@
 import requests
 import json
+import logging
 
 
 class IPAnalyzer:
@@ -9,11 +10,13 @@ class IPAnalyzer:
            analyzer = IPAnalyzer()
     """
     def __init__(self):
+        self.logger = logging.getLogger('ipchanger')
+        self.logger.info('create class IPAnalyzer')
 
         self.ip_address = None
         self.url = None
         self.ipdata_str = None
-        self.ipdata_flag = False
+        self.ip_set = False
 
         self.ipdata_service = "https://api.ipdata.co/"
         self.api_key = "?api-key=test"
@@ -26,7 +29,9 @@ class IPAnalyzer:
 
         if isinstance(ip_address, str):
             self.ip_address = ip_address
+            self.logger.info("set ip address to %s" % ip_address)
         else:
+            self.logger.error("ip_address must be type of string")
             raise TypeError("ip_address must be type of string")
 
         # create valid url
@@ -34,14 +39,14 @@ class IPAnalyzer:
 
         # make a get request and obtain the json object
         self.ipdata_str = json.loads(requests.get(url=self.url).text)
-        self.ipdata_flag = True
+        self.ip_set = True
 
     def get_ipdata(self):
         """get complete ipdata string as a json object
 
         :return: dict, ipdata json object
         """
-        if self.ipdata_flag:
+        if self.ip_set:
             return self.ipdata_str
 
     def get_city(self):
@@ -49,7 +54,7 @@ class IPAnalyzer:
 
         :return: string, city
         """
-        if self.ipdata_flag:
+        if self.ip_set:
             return self.ipdata_str['city']
 
     def get_region(self):
@@ -57,7 +62,7 @@ class IPAnalyzer:
 
         :return: string, region
         """
-        if self.ipdata_flag:
+        if self.ip_set:
             return self.ipdata_str['region']
 
     def get_country_name(self):
@@ -65,7 +70,7 @@ class IPAnalyzer:
 
         :return: string, country name
         """
-        if self.ipdata_flag:
+        if self.ip_set:
             return self.ipdata_str['country_name']
 
     def get_country_code(self):
@@ -73,7 +78,7 @@ class IPAnalyzer:
 
         :return: string, country code
         """
-        if self.ipdata_flag:
+        if self.ip_set:
             return self.ipdata_str['country_code']
 
     def get_continent_name(self):
@@ -81,7 +86,7 @@ class IPAnalyzer:
 
         :return: string, continent name
         """
-        if self.ipdata_flag:
+        if self.ip_set:
             return self.ipdata_str['continent_name']
 
     def is_tor(self):
@@ -90,7 +95,7 @@ class IPAnalyzer:
         :return: True, if it is a tor ip address
                  False, if it is not a tor ip address
         """
-        if self.ipdata_flag:
+        if self.ip_set:
             return self.ipdata_str['threat']['is_tor']
 
     def is_proxy(self):
@@ -99,7 +104,7 @@ class IPAnalyzer:
         :return: True, if is a proxy
                  False, if not a proxy
         """
-        if self.ipdata_flag:
+        if self.ip_set:
             return self.ipdata_str['threat']['is_proxy']
 
 

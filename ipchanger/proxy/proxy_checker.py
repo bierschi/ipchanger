@@ -12,13 +12,15 @@ class ProxyChecker:
             ProxyChecker(timeout=1)
     """
     def __init__(self, timeout=1):
-        self.logger = logging.getLogger(__file__)
+        self.logger = logging.getLogger('ipchanger')
+        self.logger.info("create class ProxyChecker")
 
         self.ping_url = "http://www.google.com"
 
         if isinstance(timeout, (int, float)):
             self.timeout = timeout
         else:
+            self.logger.error("timeout must be type of int")
             raise TypeError("timeout must be type of int")
 
         self.proxy_list = None
@@ -41,10 +43,11 @@ class ProxyChecker:
             self.proxy_list = proxies
             self.__process_handler(size=size)
 
-            [x.start() for x in self.processes]
-            [x.join() for x in self.processes]
+            [p.start() for p in self.processes]
+            [p.join() for p in self.processes]
 
         else:
+            self.logger.error("'proxies must be type of list, containing proxies in format ['ip:port']")
             raise TypeError("'proxies must be type of list, containing proxies in format ['ip:port']")
 
     def get_proxies_up(self):
@@ -67,7 +70,6 @@ class ProxyChecker:
         :return:lists in list, multiple sublists with size 'size'
         """
 
-        print("length of complete proxy list: %d" % len(self.proxy_list))
         return [self.proxy_list[x:x+size] for x in range(0, len(self.proxy_list), size)]
 
     def __process_handler(self, size=20):
@@ -88,7 +90,7 @@ class ProxyChecker:
         """
 
         for i, proxy in enumerate(proxy_list):
-            print("Request %d" % i)
+
             try:
 
                 response = requests.get(url=self.ping_url, proxies={"http": proxy, "https": proxy, "socks": proxy},
@@ -101,16 +103,14 @@ class ProxyChecker:
 
             except requests.Timeout:
                 self.logger.warning("Skipping proxy %s, Timeout Exception" % proxy)
-                print("Skipping proxy %s, Timeout Exception" % proxy)
                 self.proxy_dead.append(proxy)
 
             except requests.ConnectionError:
                 self.logger.warning("Skipping proxy %s, ConnectionError Exception" % proxy)
-                print("Skipping proxy %s, ConnectionError Exception" % proxy)
                 self.proxy_dead.append(proxy)
 
             except Exception as ex:
-                self.logger.critical("critical Exception by proxy occured!! :" + str(ex))
+                self.logger.error("Exception by proxy %s occured! %s" % (proxy, str(ex)))
                 self.proxy_dead.append(proxy)
 
 

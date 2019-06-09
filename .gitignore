@@ -107,3 +107,5 @@ venv.bak/
 .idea/
 ipchanger/cfg/
 ipchanger/tor_tests/
+ipchanger/logs/
+ipchanger/db/proxy.db
