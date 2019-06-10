@@ -1,12 +1,11 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 from ipchanger import __version__, __author__, __email__, __license__
 
-install_requires = [
-    "requests>=2.0",
-]
+with open('requirements.txt') as f:
+    required = f.read().splitlines()
 
-with open("README.rst") as f:
+with open("README.md", encoding='utf-8') as f:
     readme = f.read()
 
 with open("CHANGELOG.rst") as f:
@@ -17,12 +16,16 @@ setup(
     version=__version__,
     description="package to change public ip address periodically",
     long_description=readme + "\n\n" + changelog,
+    long_description_content_type='text/markdown',
     license=__license__,
     author=__author__,
     author_email=__email__,
     url="https://github.com/bierschi/ipchanger",
-    packages=["ipchanger"],
-    install_requires=install_requires,
+    packages=find_packages(),
+    data_files=[
+        'requirements.txt', 'LICENSE', 'CHANGELOG.rst'
+    ],
+    install_requires=required,
     keywords=["proxy", "grabber", "ipchanger", "public-ip", "tor", "renew-ip"],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
