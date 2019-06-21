@@ -3,7 +3,7 @@ import logging
 from multiprocessing import Process, Manager
 
 from ipchanger.proxy.proxy_grabber import ProxyGrabber
-
+from time import sleep
 
 class ProxyChecker:
     """class ProxyChecker to check if the proxy is up or dead
@@ -24,13 +24,18 @@ class ProxyChecker:
             raise TypeError("timeout must be type of int")
 
         self.proxy_list = None
-        self.proxy_up   = Manager().list()
-        self.proxy_dead = Manager().list()
+        self.proxy_up   = None
+        self.proxy_dead = None
 
-        self.processes = list()
+        self.processes = None
 
     def __del__(self):
         pass
+
+    def restart(self, proxies, size=20):
+
+        self.processes = list()
+        self.run(proxies=proxies, size=size)
 
     def run(self, proxies, size=20):
         """starts the proxy check routine
@@ -41,6 +46,9 @@ class ProxyChecker:
             # TODO check format ip:port
 
             self.proxy_list = proxies
+            self.processes = list()
+            self.proxy_up = Manager().list()
+            self.proxy_dead = Manager().list()
             self.__process_handler(size=size)
 
             [p.start() for p in self.processes]
@@ -97,6 +105,7 @@ class ProxyChecker:
                                         timeout=self.timeout)
 
                 if response.status_code == 200:
+                    # TODO check list if proxy already in
                     self.proxy_up.append(proxy)
                 else:
                     self.proxy_dead.append(proxy)
@@ -117,11 +126,14 @@ class ProxyChecker:
 if __name__ == '__main__':
     grabber = ProxyGrabber()
     proxyChecker = ProxyChecker(timeout=1)
-    proxyChecker.run(size=50, proxies=grabber.get_proxies(limit=50))
+    proxyChecker.run(size=5, proxies=grabber.get_proxies(limit=5))
     up = proxyChecker.get_proxies_up()
     print(up)
-    print(len(up))
     dead = proxyChecker.get_proxies_dead()
     print(dead)
-    print(len(dead))
-
+    sleep(5)
+    proxyChecker.restart(size=5, proxies=grabber.get_proxies(limit=5))
+    up = proxyChecker.get_proxies_up()
+    print(up)
+    dead = proxyChecker.get_proxies_dead()
+    print(dead)

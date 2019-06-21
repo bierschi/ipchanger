@@ -77,8 +77,8 @@ class ProxyDB:
 
         self.connection.commit()
 
-    def insert_proxydown(self, id , ip, port):
-        """insert a proxy down with id, ip, port
+    def insert_proxydead(self, id , ip, port):
+        """insert a proxy dead with id, ip, port
 
         """
         sql = "INSERT INTO PROXYDEAD (ID, TIMESTAMP, IP, PORT) Values (?, ?, ?, ?)"
@@ -91,8 +91,23 @@ class ProxyDB:
 
         self.connection.commit()
 
+    def delete_proxyup_id(self, id):
+        """deletes a proxy in table 'proxyup' with given id
+
+        :param id:
+        :return:
+        """
+        pass
+
+    def delete_proxydead_id(self, id):
+        """deletes a proxy in table 'proxydead' with given id
+
+        :param id:
+        :return:
+        """
+        pass
+
 
 if __name__ == '__main__':
     db = ProxyDB()
-    db.insert_proxyup(0, "192.168.2.3", 80)
-    db.insert_proxyup(1, "46.80.1.2", 80)
+    print(db.get_last_row(table='PROXYUP'))

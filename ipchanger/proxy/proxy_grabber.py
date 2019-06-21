@@ -35,6 +35,7 @@ class ProxyGrabber:
 
         if limit is not None:
             self.logger.info("get %d proxies" % len(self.proxy_list[:limit]))
+            # TODO check limit attribute
             return self.proxy_list[:limit]
         else:
             self.logger.info("get %d proxies" % len(self.proxy_list))
