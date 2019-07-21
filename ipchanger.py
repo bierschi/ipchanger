@@ -24,6 +24,7 @@ def tor_simple():
         curr_ip = tor.get_current_ip()
         analyzer.set_ip(ip_address=curr_ip)
         print("current_ip: %s from country: %s" % (curr_ip, analyzer.get_country_name()))
+        tor.request(url="http://www.bierschi.de")
         tor.renew_ip()
 
     print(tor.get_used_ips())

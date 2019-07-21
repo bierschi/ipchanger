@@ -11,11 +11,12 @@ from stem.util import term
 from stem.control import Controller
 from stem import Signal
 from stem.util import system
-
 from stem import SocketError
 
+from tor.proxy_request import ProxyRequest
 
-class Tor:
+
+class Tor(ProxyRequest):
     """class Tor to set up a tor process
 
     USAGE:
@@ -27,7 +28,7 @@ class Tor:
         :param socks_port: define socks port, default 9050
         :param control_port: define control port, default 9051
         """
-
+        ProxyRequest.__init__(self)
         self.logger = logging.getLogger('ipchanger')
         self.logger.info('create class Tor')
 
@@ -39,8 +40,12 @@ class Tor:
         self.controller = None
         self.pid = None
 
-        self.http_proxies = {'http' : http_proxy,
-                             'https': https_proxy}
+        if http_proxy:
+            self.proxies['http'] = http_proxy
+        if https_proxy:
+            self.proxies['https'] = https_proxy
+        else:
+            self.proxies = self.tor_default_proxies
 
         self.ip_request_str = "http://icanhazip.com/"
         self.real_host_ip = requests.get(self.ip_request_str).text
@@ -58,6 +63,15 @@ class Tor:
 
         if os.path.exists(self.data_directory):
             rmtree(self.data_directory)
+
+    def request(self, url):
+        """requests the given url
+
+        """
+
+        self.logger.info("request url: %s with proxy: %s" % (url, self.proxies['http']))
+        self.session.proxies = self.proxies
+        self.session.get(url=url)
 
     def launch(self, exit_nodes=None):
         """launches a tor process with configuration dictionary
@@ -215,7 +229,7 @@ class Tor:
         """
         try:
 
-            current_ip = requests.get(url=self.ip_request_str, proxies=self.http_proxies).text.rstrip()
+            current_ip = requests.get(url=self.ip_request_str, proxies=self.proxies).text.rstrip()
             self.__save_used_ips(ip_address=current_ip)
 
             return current_ip
