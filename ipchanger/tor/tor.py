@@ -54,10 +54,7 @@ class Tor:
         """destructor
         """
 
-        if (self.controller and self.process) is not None:
-            self.controller.close()
-            self.process.terminate()
-            self.process.wait()
+        self.kill_process()
 
         if os.path.exists(self.data_directory):
             rmtree(self.data_directory)
