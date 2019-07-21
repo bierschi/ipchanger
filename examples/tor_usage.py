@@ -1,6 +1,6 @@
-from ipchanger import Logger
-from ipchanger import IPAnalyzer
-from ipchanger import Tor
+from pyhidentity import Logger
+from pyhidentity import IPAnalyzer
+from pyhidentity import Tor
 
 # set up configuration attributes
 socks_port   = 9050
@@ -42,8 +42,8 @@ def tor_with_exit_nodes():
 def main():
 
     # set up logger instance
-    logger = Logger(name='ipchanger', level='info', log_folder='/var/log/', debug=True)
-    logger.info("start application ipchanger")
+    logger = Logger(name='pyhidentity', level='info', log_folder='/var/log/', debug=True)
+    logger.info("start application pyhidentity")
 
     tor_simple()
     tor_with_exit_nodes()

@@ -105,7 +105,7 @@ venv.bak/
 
 #project
 .idea/
-ipchanger/cfg/
-ipchanger/tor_tests/
-ipchanger/logs/
-ipchanger/db/proxy.db
+pyhidentity/cfg/
+pyhidentity/tor_tests/
+pyhidentity/logs/
+pyhidentity/db/proxy.db
