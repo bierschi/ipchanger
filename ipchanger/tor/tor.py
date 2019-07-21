@@ -1,6 +1,7 @@
 import requests
 import logging
-from os import path
+import os
+import signal
 from time import sleep
 from tempfile import mkdtemp
 from shutil import rmtree
@@ -9,6 +10,9 @@ from stem.process import launch_tor_with_config
 from stem.util import term
 from stem.control import Controller
 from stem import Signal
+from stem.util import system
+
+from stem import SocketError
 
 
 class Tor:
@@ -33,6 +37,7 @@ class Tor:
         self.config = dict()
         self.process = None
         self.controller = None
+        self.pid = None
 
         self.http_proxies = {'http' : http_proxy,
                              'https': https_proxy}
@@ -47,14 +52,14 @@ class Tor:
 
     def __del__(self):
         """destructor
-
         """
+
         if (self.controller and self.process) is not None:
             self.controller.close()
             self.process.terminate()
             self.process.wait()
 
-        if path.exists(self.data_directory):
+        if os.path.exists(self.data_directory):
             rmtree(self.data_directory)
 
     def launch(self, exit_nodes=None):
@@ -64,18 +69,36 @@ class Tor:
         """
 
         if exit_nodes is None:
-            self.logger.info("starting tor process with default configuration")
-            self.process = launch_tor_with_config(
-                config=self.create_config(),
-                init_msg_handler=self.__print_bootstrap_lines,
-            )
+            pid = self.__get_tor_pid()
+            if pid is None:
+                self.logger.info("starting tor process with default configuration")
+
+                try:
+                    self.process = launch_tor_with_config(
+                        config=self.__create_config(),
+                        init_msg_handler=self.__print_bootstrap_lines,
+                    )
+                except OSError as ex:
+                    self.logger.error(ex)
+                except (ConnectionRefusedError, SocketError) as ex:
+                    self.logger.error(ex)
+
+            else:
+                self.logger.info("tor process is already running with pid %d" % pid)
 
         else:
-            self.logger.info("starting tor process with defined exit nodes")
-            self.process = launch_tor_with_config(
-                config=self.create_config(exit_nodes=exit_nodes),
-                init_msg_handler=self.__print_bootstrap_lines,
-            )
+            self.kill_process()
+            self.logger.info("starting tor process with defined exit nodes %s" % exit_nodes)
+
+            try:
+                self.process = launch_tor_with_config(
+                    config=self.__create_config(exit_nodes=exit_nodes),
+                    init_msg_handler=self.__print_bootstrap_lines,
+                )
+            except OSError as ex:
+                self.logger.error(ex)
+            except (ConnectionRefusedError, SocketError) as ex:
+                self.logger.error(ex)
 
         self.controller = Controller.from_port(port=self.control_port)
         self.controller.authenticate()
@@ -96,11 +119,30 @@ class Tor:
         """kills current tor process
 
         """
-        if self.process:
-            self.logger.info("killing tor process")
-            self.process.kill()
 
-    def create_config(self, exit_nodes=None):
+        pid = self.__get_tor_pid()
+
+        if pid is not None:
+            if self.controller is not None:
+                self.controller.close()
+            os.kill(pid, signal.SIGKILL)
+            self.logger.info("killed tor process with pid %d" % pid)
+        else:
+            self.logger.info("pid for tor process not found!")
+
+    def __get_tor_pid(self):
+        """get current tor process id
+
+        :return: int, pid
+        """
+        pid = system.pid_by_port(self.socks_port)
+
+        if pid is None:
+            pid = system.pid_by_name('tor')
+
+        return pid
+
+    def __create_config(self, exit_nodes=None):
         """creates a config dictionary
 
         :param exit_nodes: str with country codes in form: '{gb}, {ru}, {de}, {us}'
@@ -204,19 +246,6 @@ class Tor:
 
 
 if __name__ == '__main__':
-    from utils.ip_analyzer import IPAnalyzer
-    ip_anal = IPAnalyzer()
-    tor = Tor(socks_port=9050, control_port=9051)
-    p1 = tor.launch()
-    i =0
-    j = 0
+    tor = Tor(socks_port=9050, control_port=9051).launch()
 
-    while i < 3:
-        curr_ip = p1.get_current_ip()
-        ip_anal.set_ip(ip_address=curr_ip)
-        print("curr_ip : %s , analyze country: %s" % (curr_ip, ip_anal.get_country_name()))
-        p1.renew_ip()
-        sleep(2)
-        i += 1
 
-    print(p1.get_used_ips())

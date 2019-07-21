@@ -13,7 +13,7 @@ class Logger:
     """
     __instance = None
 
-    def __init__(self, name='ipchanger', level=logging.INFO, log_folder='/var/log', log_file_size=10000000, debug=False):
+    def __init__(self, name='ipchanger', level='info', log_folder='/var/log', log_file_size=10000000, debug=False):
 
         if Logger.__instance is not None:
             raise Exception("This class is a singleton!")
@@ -26,12 +26,23 @@ class Logger:
         else:
             raise TypeError("'name' must be type of string")
 
-        self.logger.setLevel(level)
+        if level == 'info':
+            self.level = logging.INFO
+        elif level == 'debug':
+            self.level = logging.DEBUG
+        elif level == 'warn':
+            self.level = logging.WARN
+        elif level == 'error':
+            self.level = logging.ERROR
+        else:
+            # default level
+            self.level = logging.INFO
 
+        self.logger.setLevel(self.level)
         formatter = logging.Formatter('%(asctime)s - %(lineno)d@%(filename)s - %(levelname)s: %(message)s')
 
         stream_handler = logging.StreamHandler()
-        stream_handler.setLevel(level)
+        stream_handler.setLevel(self.level)
         stream_handler.setFormatter(formatter)
 
         if not debug:
