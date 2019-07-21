@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-from ipchanger import __version__, __author__, __email__, __license__
+from pyhidentity import __version__, __author__, __email__, __license__
 
 with open('requirements.txt') as f:
     required = f.read().splitlines()
@@ -12,21 +12,21 @@ with open("CHANGELOG.rst") as f:
     changelog = f.read()
 
 setup(
-    name="ipchanger",
+    name="pyhidentity",
     version=__version__,
-    description="package to change public ip address periodically",
+    description="hides your real identity with python",
     long_description=readme + "\n\n" + changelog,
     long_description_content_type='text/markdown',
     license=__license__,
     author=__author__,
     author_email=__email__,
-    url="https://github.com/bierschi/ipchanger",
+    url="https://github.com/bierschi/pyhidentity",
     packages=find_packages(),
     data_files=[
         'requirements.txt', 'LICENSE', 'CHANGELOG.rst'
     ],
     install_requires=required,
-    keywords=["proxy", "grabber", "ipchanger", "public-ip", "tor", "renew-ip"],
+    keywords=["proxy", "grabber", "pyhidentity", "public-ip", "tor", "renew-ip"],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
@@ -49,7 +49,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "ipchanger = ipchanger.ipchanger:main",
+            "pyhidentity = pyhidentity.pyhidentity:main",
         ],
     },
     zip_safe=True,
