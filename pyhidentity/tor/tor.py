@@ -13,10 +13,8 @@ from stem import Signal
 from stem.util import system
 from stem import SocketError
 
-from tor.proxy_request import ProxyRequest
 
-
-class Tor(ProxyRequest):
+class Tor:
     """class Tor to set up a tor process
 
     USAGE:
@@ -28,7 +26,6 @@ class Tor(ProxyRequest):
         :param socks_port: define socks port, default 9050
         :param control_port: define control port, default 9051
         """
-        ProxyRequest.__init__(self)
         self.logger = logging.getLogger('pyhidentity')
         self.logger.info('create class Tor')
 
@@ -63,15 +60,6 @@ class Tor(ProxyRequest):
 
         if os.path.exists(self.data_directory):
             rmtree(self.data_directory)
-
-    def request(self, url):
-        """requests the given url
-
-        """
-
-        self.logger.info("request url: %s with proxy: %s" % (url, self.proxies['http']))
-        self.session.proxies = self.proxies
-        self.session.get(url=url)
 
     def launch(self, exit_nodes=None):
         """launches a tor process with configuration dictionary
