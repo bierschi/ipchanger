@@ -37,19 +37,6 @@ class Tor:
         self.controller = None
         self.pid = None
 
-        if http_proxy:
-            self.proxies['http'] = http_proxy
-        if https_proxy:
-            self.proxies['https'] = https_proxy
-        else:
-            self.proxies = self.tor_default_proxies
-
-        self.ip_request_str = "http://icanhazip.com/"
-        self.real_host_ip = requests.get(self.ip_request_str).text
-        self.logger.info('real host ip: %s' % self.real_host_ip)
-
-        self.__used_ips = list()
-
         self.data_directory = mkdtemp()
 
     def __del__(self):
@@ -84,7 +71,7 @@ class Tor:
 
             else:
                 self.logger.info("tor process is already running with pid %d" % pid)
-
+                return self # TODO check if possible
         else:
             self.kill_process()
             self.logger.info("starting tor process with defined exit nodes %s" % exit_nodes)
@@ -111,8 +98,7 @@ class Tor:
         """
         self.logger.info("restart tor process")
         self.kill_process()
-        self.__used_ips = list()
-        self.launch(exit_nodes=exit_nodes)
+        return self.launch(exit_nodes=exit_nodes)
 
     def kill_process(self):
         """kills current tor process
@@ -181,7 +167,7 @@ class Tor:
         if "100%" in line:
             self.logger.debug("[%05d] Tor process executed successfully" % self.socks_port)
 
-    def __trigger_new_ip(self):
+    def trigger_new_ip(self):
         """triggers a new ip address, means not that current ip has changed!!
 
         """
@@ -195,53 +181,6 @@ class Tor:
 
         except Exception as ex:
             self.logger.error("Exception while trying to trigger new ip: %s" % ex)
-
-    def __save_used_ips(self, ip_address):
-        """save already used ip addresses in a list
-
-        """
-        if ip_address not in self.__used_ips:
-            self.__used_ips.append(ip_address)
-
-    def get_used_ips(self):
-        """get list with all ip addresses
-
-        :return: list: containing all used ip addresses
-        """
-        return self.__used_ips
-
-    def get_current_ip(self):
-        """get current ip address with request to icanhazip service
-
-        :return: String: current ip address
-        """
-        try:
-
-            current_ip = requests.get(url=self.ip_request_str, proxies=self.proxies).text.rstrip()
-            self.__save_used_ips(ip_address=current_ip)
-
-            return current_ip
-
-        except ConnectionRefusedError as ex:
-            self.logger.error("ConnectionRefusedError: %s" % ex)
-
-    def renew_ip(self):
-        """renew current ip address, this can take a while
-
-        :return: string, new ip address
-        """
-
-        old_ip = new_ip = self.get_current_ip()
-
-        while old_ip == new_ip:
-
-            old_ip = new_ip
-            self.__trigger_new_ip()
-            new_ip = self.get_current_ip()
-
-        self.logger.info("renewed the ip address to: %s" % new_ip)
-
-        return new_ip
 
 
 if __name__ == '__main__':

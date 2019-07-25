@@ -4,10 +4,10 @@ from tor.tor import Tor
 
 
 class TorRequest(BaseRequest):
-    """Abstract Base class ProxyRequest for requests with specific proxies
+    """ Class TorRequest for generating requests with ip addresses from the tor network
 
     """
-    def __init__(self, socks_port, control_port, http_proxy=None, https_proxy=None):
+    def __init__(self, socks_port, control_port, http_proxy='127.0.0.1:8118', https_proxy='127.0.0.1:8118'):
         self.logger = logging.getLogger('pyhidentity')
         self.logger.info('create class TorRequest')
 
@@ -15,7 +15,7 @@ class TorRequest(BaseRequest):
         self.control_port = control_port
 
         # init base class
-        BaseRequest.__init__(self, http_proxy=http_proxy, https_proxy=https_proxy)
+        BaseRequest.__init__(self)
 
         # init tor class
         self.tor = Tor(socks_port=socks_port, control_port=control_port, http_proxy=http_proxy, https_proxy=https_proxy).launch()
@@ -31,11 +31,23 @@ class TorRequest(BaseRequest):
                 'https': 'socks5://127.0.0.1:{}'.format(self.socks_port)
             }
 
+        # set proxies
+        self.session.proxies = self.proxies
+
+        self._save_used_ips(self.get_current_ip())
+
     def __del__(self):
         """destructor
 
         """
-        pass
+        self.quit()
+
+    def quit(self):
+        """
+
+        :return:
+        """
+        self.tor.kill_process()
 
     def call(self, url):
         """
@@ -44,27 +56,39 @@ class TorRequest(BaseRequest):
         """
 
         self.logger.info("request url: %s with proxy: %s" % (url, self.proxies['http']))
-        self.session.proxies = self.proxies
         self.session.get(url=url)
 
-    def get_current_ip(self):
+    def new_identity(self):
         """
 
         :return:
         """
-        pass
+        new_ip = self.__renew_ip()
+        self.logger.info("renewed the ip address to: %s" % new_ip)
 
-    def get_used_ips(self):
+        self._save_used_ips(ip_address=new_ip)
+
+    def set_countries(self, countries):
         """
 
+        :param countries:
         :return:
         """
-        pass
+        self.delete_used_ips()
+        self.tor = self.tor.restart(exit_nodes=countries)
 
-    def save_used_ips(self, ip_address):
+    def __renew_ip(self):
+        """renew current ip address, this can take a while
+
+        :return: string, new ip address
         """
 
-        :param ip_address:
-        :return:
-        """
-        pass
+        old_ip = new_ip = self.get_current_ip()
+
+        while old_ip == new_ip:
+
+            old_ip = new_ip
+            self.tor.trigger_new_ip()
+            new_ip = self.get_current_ip()
+
+        return new_ip

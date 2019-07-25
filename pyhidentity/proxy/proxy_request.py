@@ -13,7 +13,9 @@ class ProxyRequest(BaseRequest):
         self.logger.info('create class ProxyRequest')
 
         # init base class
-        BaseRequest.__init__(self, http_proxy=http_proxy, https_proxy=https_proxy)
+        BaseRequest.__init__(self)
+
+        self.__used_ips = list()
 
     def __del__(self):
         """destructor
@@ -43,7 +45,7 @@ class ProxyRequest(BaseRequest):
 
         :return:
         """
-        pass
+        return self.__used_ips
 
     def save_used_ips(self, ip_address):
         """
@@ -51,5 +53,6 @@ class ProxyRequest(BaseRequest):
         :param ip_address:
         :return:
         """
-        pass
+        if ip_address not in self.__used_ips:
+            self.__used_ips.append(ip_address)
 

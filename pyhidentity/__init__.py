@@ -7,5 +7,6 @@ __license__ = "MIT"
 
 # set library modules
 from pyhidentity.tor.tor import Tor
+from pyhidentity.tor.tor_request import TorRequest
 from pyhidentity.utils.ip_analyzer import IPAnalyzer
 from pyhidentity.utils.logger import Logger
