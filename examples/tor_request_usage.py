@@ -16,14 +16,19 @@ def main():
 
     analyzer = IPAnalyzer()
     tor_req = TorRequest(socks_port=socks_port, control_port=control_port, http_proxy=http_proxy, https_proxy=https_proxy)
+    #tor_req = TorRequest(socks_port=socks_port, control_port=control_port)
 
     for i in range(3):
         curr_ip = tor_req.get_current_ip()
         analyzer.set_ip(ip_address=curr_ip)
         print("current_ip: %s from country: %s" % (curr_ip, analyzer.get_country_name()))
         tor_req.new_identity()
-    print(tor_req.get_used_ips())
 
+    #print(tor_req.get_used_ips())
+    tor_req.quit()
+
+    """
+    
     tor_req.set_countries('{ru}, {us}')
     for i in range(3):
         curr_ip = tor_req.get_current_ip()
@@ -31,7 +36,7 @@ def main():
         print("current_ip: %s from country: %s" % (curr_ip, analyzer.get_country_name()))
         tor_req.new_identity()
     print(tor_req.get_used_ips())
-
+    """
 
 if __name__ == '__main__':
     main()

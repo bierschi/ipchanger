@@ -1,4 +1,3 @@
-import requests
 import logging
 import os
 import signal
@@ -20,7 +19,7 @@ class Tor:
     USAGE:
             Tor(socks_port=9050, control_port=9051)
     """
-    def __init__(self, socks_port=9050, control_port=9051, http_proxy='127.0.0.1:8118', https_proxy='127.0.0.1:8118'):
+    def __init__(self, socks_port=9050, control_port=9051):
         """
 
         :param socks_port: define socks port, default 9050
@@ -63,6 +62,7 @@ class Tor:
                     self.process = launch_tor_with_config(
                         config=self.__create_config(),
                         init_msg_handler=self.__print_bootstrap_lines,
+                        take_ownership=True
                     )
                 except OSError as ex:
                     self.logger.error(ex)
@@ -71,7 +71,7 @@ class Tor:
 
             else:
                 self.logger.info("tor process is already running with pid %d" % pid)
-                return self # TODO check if possible
+                #return self # TODO check if possible
         else:
             self.kill_process()
             self.logger.info("starting tor process with defined exit nodes %s" % exit_nodes)
