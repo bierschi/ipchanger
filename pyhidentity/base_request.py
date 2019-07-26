@@ -21,6 +21,8 @@ class BaseRequest(ABC):
         # split into ip and port
         #self.http_proxy.split(':')
 
+        self.tor_proxies = {}
+
         self.proxies = {
             'http': '',
             'https': ''
@@ -41,7 +43,7 @@ class BaseRequest(ABC):
         """
         try:
 
-            return self.session.get(url=self.ip_request_str, proxies=self.proxies).text.rstrip()
+            return self.session.get(url=self.ip_request_str).text.rstrip()
 
         except ConnectionRefusedError as ex:
             self.logger.error("ConnectionRefusedError: %s" % ex)

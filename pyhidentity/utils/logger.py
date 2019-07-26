@@ -50,6 +50,8 @@ class Logger:
             info_log_file_path = log_folder + '/pyhidentity/info.log'
             error_log_file_path = log_folder + '/pyhidentity/error.log'
         else:
+            if not os.path.exists(ROOT_DIR + '/logs'):
+                os.mkdir(ROOT_DIR + '/logs')
             info_log_file_path = ROOT_DIR + '/logs/info.log'
             error_log_file_path = ROOT_DIR + '/logs/error.log'
 

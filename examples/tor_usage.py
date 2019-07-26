@@ -5,7 +5,7 @@ from pyhidentity import Tor
 import requests
 
 # set up configuration attributes
-socks_port   = 9050 # 8118 for privoxy
+socks_port   = 9050
 control_port = 9051
 
 
@@ -16,15 +16,15 @@ def get_current_ip():
     """
 
     session = requests.session()
-    #session.proxies.update({
-    #    'http': 'socks5://localhost:9050',
-    #    'https': 'socks5://localhost:9050',
-    #})
     session.proxies.update({
-        'http': 'http://localhost:8118',
-        'https': 'https://localhost:8118',
+        'http': 'socks5://localhost:9050',
+        'https': 'socks5://localhost:9050',
     })
-    return session.get(url="http://icanhazip.com/").text.rstrip()
+    #session.proxies.update({
+    #    'http': 'http://localhost:8118',
+    #    'https': 'https://localhost:8118',
+    #})
+    return session.get(url='http://icanhazip.com/').text.rstrip()
 
 
 def tor_simple():
