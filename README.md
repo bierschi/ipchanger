@@ -13,3 +13,27 @@ included features within this library:
 
 
 ## usage
+
+## tor dependency and settings
+install tor with apt
+<pre><code>
+sudo apt install tor
+</code></pre>
+
+edit the torrc file in `/etc/tor`
+<pre><code>
+
+</code></pre>
+
+
+## privoxy
+
+<pre><code>
+sudo apt install privoxy
+</code></pre>
+
+## add user 
+
+<pre><code>
+sudo usermod -a -G debian-tor "username"
+</code></pre>

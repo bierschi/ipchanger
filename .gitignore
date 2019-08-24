@@ -109,3 +109,4 @@ pyhidentity/cfg/
 pyhidentity/tor_tests/
 pyhidentity/logs/
 pyhidentity/db/proxy.db
+notes.txt
