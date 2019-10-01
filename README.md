@@ -10,9 +10,15 @@ included features within this library:
  
  
 ## installation
+install from source with: 
 
+<pre><code>
+sudo python3 setup.py install
+</code></pre>
 
 ## usage
+
+
 
 ## tor dependency and settings
 install tor with apt
@@ -37,3 +43,11 @@ sudo apt install privoxy
 <pre><code>
 sudo usermod -a -G debian-tor "username"
 </code></pre>
+
+
+## Changelog
+All changes and versioning information can be found in the [CHANGELOG](https://github.com/bierschi/pyhidentity/blob/master/CHANGELOG.rst)
+
+## License
+Copyright (c) 2019 Bierschneider Christian. See [LICENSE](https://github.com/bierschi/pyhidentity/blob/master/LICENSE)
+for details

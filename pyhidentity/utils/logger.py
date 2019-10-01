@@ -1,7 +1,7 @@
 import os
 import logging
 from logging.handlers import RotatingFileHandler
-from definitions import ROOT_DIR
+from pyhidentity import ROOT_DIR
 
 
 class Logger:

@@ -1,5 +1,5 @@
 import logging
-from base_request import BaseRequest
+from pyhidentity.base_request import BaseRequest
 
 
 class ProxyRequest(BaseRequest):

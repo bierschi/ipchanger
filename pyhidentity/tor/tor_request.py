@@ -1,6 +1,6 @@
 import logging
-from base_request import BaseRequest
-from tor.tor import Tor
+from pyhidentity.base_request import BaseRequest
+from pyhidentity.tor.tor import Tor
 
 
 class TorRequest(BaseRequest):

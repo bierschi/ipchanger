@@ -1,5 +1,5 @@
 import configparser
-from definitions import ROOT_DIR
+from pyhidentity import ROOT_DIR
 
 from pyhidentity import Logger
 from pyhidentity import IPAnalyzer

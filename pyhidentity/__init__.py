@@ -5,6 +5,9 @@ __author__ = "Christian Bierschneider"
 __email__ = "christian.bierschneider@web.de"
 __license__ = "MIT"
 
+import os
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # set library modules
 from pyhidentity.tor.tor import Tor
 from pyhidentity.tor.tor_request import TorRequest

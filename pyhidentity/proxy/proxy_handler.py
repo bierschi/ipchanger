@@ -1,8 +1,8 @@
 import logging
 import threading
-from proxy.proxy_grabber import ProxyGrabber
-from proxy.proxy_checker import ProxyChecker
-from db.proxy_db import ProxyDB
+from pyhidentity.proxy.proxy_grabber import ProxyGrabber
+from pyhidentity.proxy.proxy_checker import ProxyChecker
+from pyhidentity.db.proxy_db import ProxyDB
 from time import sleep
 
 
