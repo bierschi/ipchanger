@@ -1,4 +1,5 @@
 # pyhidentity
+[![Build Status](https://travis-ci.org/bierschi/pyhidentity.svg?branch=master)](https://travis-ci.org/bierschi/ComunioScore) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/bierschi/pyhidentity/blob/master/LICENSE) <br>
 
 pyhidentity is a **py**thon based library to **hide** your **identity**
 
