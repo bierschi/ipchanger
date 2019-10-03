@@ -10,6 +10,7 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # set library modules
 from pyhidentity.tor.tor import Tor
-from pyhidentity.tor.tor_request import TorRequest
+from pyhidentity.tor_request import TorRequest
+from pyhidentity.proxy_request import ProxyRequest
 from pyhidentity.utils.ip_analyzer import IPAnalyzer
 from pyhidentity.utils.logger import Logger

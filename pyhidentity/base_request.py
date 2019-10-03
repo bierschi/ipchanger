@@ -11,30 +11,29 @@ class BaseRequest(ABC):
         self.logger = logging.getLogger('pyhidentity')
         self.logger.info('create class BaseRequest')
 
-        self.ip_request_str = "http://icanhazip.com/"
-        #self.http_proxy = str(http_proxy)
-        #self.https_proxy = str(https_proxy)
+        self.icanhazip = "http://icanhazip.com/"
+        self.real_host_ip = requests.get(self.icanhazip).text
+        self.logger.info('real host ip: %s' % self.real_host_ip)
 
-        #if ':' not in (self.http_proxy and self.https_proxy):
-        #        raise ValueError('')
-
-        # split into ip and port
-        #self.http_proxy.split(':')
-
-        self.tor_proxies = {}
+        # create a request session
+        self.session = requests.session()
 
         self.proxies = {
             'http': '',
-            'https': ''
+            'https': '',
+            'socks': ''
         }
 
-        self.real_host_ip = requests.get(self.ip_request_str).text
-        self.logger.info('real host ip: %s' % self.real_host_ip)
-
-        self.session = requests.session()
+        self.tor_proxies = {}
 
         # save used ips in a list
         self.__used_ips = list()
+
+    def __del__(self):
+        """ destructor
+
+        """
+        self.session.cookies.clear()
 
     def get_current_ip(self):
         """get current ip address with a request to icanhazip service
@@ -43,13 +42,13 @@ class BaseRequest(ABC):
         """
         try:
 
-            return self.session.get(url=self.ip_request_str).text.rstrip()
+            return self.session.get(url=self.icanhazip).text.rstrip()
 
         except ConnectionRefusedError as ex:
             self.logger.error("ConnectionRefusedError: %s" % ex)
 
     def get_used_ips(self):
-        """get list with all ip addresses
+        """get list with all used ip addresses
 
         :return: list: containing all used ip addresses
         """
@@ -64,16 +63,56 @@ class BaseRequest(ABC):
             self.__used_ips.append(ip_address)
 
     def delete_used_ips(self):
-        """
+        """ deletes the used ips container
 
-        :return:
         """
         self.__used_ips = list()
 
     @abstractmethod
-    def call(self, url):
+    def new_identity(self):
         """
 
         :return:
+        """
+        pass
+
+    @abstractmethod
+    def get(self, url, **kwargs):
+        """ sends a get request
+
+        :param url: url for the request
+        :param kwargs: optional arguments
+        :return: Response object
+        """
+        pass
+
+    @abstractmethod
+    def post(self, url, data=None, json=None, **kwargs):
+        """ sends a post request
+
+        :param url: url for the request
+        :param kwargs: optional arguments
+        :return: Response object
+        """
+        pass
+
+    @abstractmethod
+    def put(self, url, data=None, **kwargs):
+        """ sends a put request
+
+        :param url: url for the request
+        :param data: data for the request
+        :param kwargs: optional arguments
+        :return: Response object
+        """
+        pass
+
+    @abstractmethod
+    def delete(self, url, **kwargs):
+        """ sends a delete request
+
+        :param url: url for the request
+        :param kwargs: optional arguments
+        :return: Response object
         """
         pass

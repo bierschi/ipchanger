@@ -2,7 +2,7 @@ import requests
 import logging
 from multiprocessing import Process, Manager
 
-from pyhidentity.proxy.proxy_grabber import ProxyGrabber
+from pyhidentity.proxy.grabber import ProxyGrabber
 from time import sleep
 
 class ProxyChecker:
