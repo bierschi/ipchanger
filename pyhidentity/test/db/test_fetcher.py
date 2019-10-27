@@ -17,7 +17,7 @@ class TestDBFetcher(unittest.TestCase):
         self.creator.build(obj=Table("test", Column(name="id", type="bigint"),
                                              Column(name="username", type="text")))
 
-        sql = "insert into test (id, username) values (%s, %s)"
+        sql = "insert into test (id, username) values (?, ?)"
         self.inserter.many_rows(sql=sql, datas=[(0, "abc"), (1, "def"), (2, "ghi")])
 
     def test_one(self):

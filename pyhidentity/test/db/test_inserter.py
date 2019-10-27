@@ -22,7 +22,7 @@ class TestDBInserter(unittest.TestCase):
 
     def test_row(self):
 
-        sql = "insert into test (id, username) values (%s, %s)"
+        sql = "insert into test (id, username) values (?, ?)"
         self.inserter.row(sql=sql, data=(0, "abc"))
         sql_fetch = "select * from test"
         one_row = self.fetcher.one(sql=sql_fetch)
@@ -32,7 +32,7 @@ class TestDBInserter(unittest.TestCase):
 
     def test_many_rows(self):
 
-        sql = "insert into test (id, username) values (%s, %s)"
+        sql = "insert into test (id, username) values (?, ?)"
         self.inserter.many_rows(sql=sql, datas=[(0, "abc"), (1, "def"), (2, "ghi")])
 
         sql_fetch = "select * from test"
