@@ -2,7 +2,7 @@ import os
 import logging
 import sqlite3
 import time
-from definitions import ROOT_DIR
+from pyhidentity import ROOT_DIR
 
 
 class ProxyDB:

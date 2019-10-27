@@ -14,14 +14,14 @@ with open("CHANGELOG.rst") as f:
 setup(
     name="pyhidentity",
     version=__version__,
-    description="hiding your real identity with python",
+    description="pyhidentity is a python based library to hide your real identity",
     long_description=readme + "\n\n" + changelog,
     license=__license__,
     author=__author__,
     author_email=__email__,
     url="https://github.com/bierschi/pyhidentity",
     packages=find_packages(),
-    #data_files=[],
+    include_package_data=True,
     install_requires=required,
     keywords=["proxy", "grabber", "pyhidentity", "public-ip", "tor", "renew-ip"],
     classifiers=[
