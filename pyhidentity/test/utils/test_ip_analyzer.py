@@ -1,7 +1,7 @@
 import unittest
 
 
-class TestGrabber(unittest.TestCase):
+class TestIPAnalyzer(unittest.TestCase):
 
     def setUp(self) -> None:
         pass

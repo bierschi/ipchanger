@@ -14,12 +14,12 @@ class TestDBConnector(unittest.TestCase):
     def test_get_cursor(self):
 
         with self.connector.get_cursor() as cursor:
-            self.assertIsInstance(cursor, sqlite3.Cursor, msg="cursor must be type of psycopg2.extensions.cursor")
+            self.assertIsInstance(cursor, sqlite3.Cursor, msg="cursor must be type of sqlite.Cursor")
 
     def test_get_conn(self):
 
         with self.connector.get_conn() as conn:
-            self.assertIsInstance(conn, sqlite3.Connection, msg="conn must be type of psycopg2.extensions.connection")
+            self.assertIsInstance(conn, sqlite3.Connection, msg="conn must be type of sqlite.Connection")
 
     def tearDown(self) -> None:
         pass
