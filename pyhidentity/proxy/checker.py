@@ -1,12 +1,12 @@
 import requests
 import logging
-from multiprocessing import Process, Manager
-
-from pyhidentity.proxy.grabber import ProxyGrabber
 from time import sleep
+from multiprocessing import Process, Manager
+from pyhidentity.proxy.grabber import ProxyGrabber
+
 
 class ProxyChecker:
-    """class ProxyChecker to check if the proxy is up or dead
+    """class ProxyChecker to check if a proxy is up or dead
 
     USAGE:
             ProxyChecker(timeout=1)
@@ -126,13 +126,13 @@ class ProxyChecker:
 if __name__ == '__main__':
     grabber = ProxyGrabber()
     proxyChecker = ProxyChecker(timeout=1)
-    proxyChecker.run(size=5, proxies=grabber.get_proxies(limit=5))
+    proxyChecker.run(size=5, proxies=grabber.get_proxies(number=5))
     up = proxyChecker.get_proxies_up()
     print(up)
     dead = proxyChecker.get_proxies_dead()
     print(dead)
     sleep(5)
-    proxyChecker.restart(size=5, proxies=grabber.get_proxies(limit=5))
+    proxyChecker.restart(size=5, proxies=grabber.get_proxies(number=5))
     up = proxyChecker.get_proxies_up()
     print(up)
     dead = proxyChecker.get_proxies_dead()

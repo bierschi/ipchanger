@@ -19,7 +19,9 @@ sudo python3 setup.py install
 
 ## usage
 
-
+- ProxyRequest()
+- TorRequest()
+- ProxyDatabase()
 
 ## tor dependency and settings
 install tor with apt

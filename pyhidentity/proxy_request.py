@@ -9,7 +9,9 @@ class ProxyRequest(BaseRequest):
             proxyreq = ProxyRequest()
             proxyreq.get(url="http://icanhazip.com/")
     """
-    def __init__(self, http_proxy=None, https_proxy=None):
+    proxy_pool = dict()
+
+    def __init__(self, proxytype='all'):
         self.logger = logging.getLogger('pyhidentity')
         self.logger.info('create class ProxyRequest')
 
@@ -21,6 +23,12 @@ class ProxyRequest(BaseRequest):
 
         :return:
         """
+        self.index = random.randint(0, len(self.proxy_pool['http']) -1)
+        tmp_proxy = self.proxy_pool['http'][self.index]
+        print(tmp_proxy)
+        self.proxies['http'] = tmp_proxy
+        self.proxies['https'] = tmp_proxy
+        self.session.proxies = self.proxies
         pass
 
     def get(self, url, **kwargs):
@@ -30,7 +38,13 @@ class ProxyRequest(BaseRequest):
         :param kwargs: optional arguments
         :return: Response object
         """
-        return self.session.get(url=url, **kwargs)
+        try:
+            return self.session.get(url=url, proxies=self.proxies, timeout=1, **kwargs)
+        except Exception as e:
+            print(e)
+            self.new_identity()
+            self.get(url=url)
+        #return self.session.get(url=url, proxies=self.proxies, timeout=1, **kwargs)
 
     def post(self, url, data=None, json=None, **kwargs):
         """ sends a post request
@@ -63,4 +77,5 @@ class ProxyRequest(BaseRequest):
 
 if __name__ == '__main__':
     proxyreq = ProxyRequest()
-    print(proxyreq.get(url="http://icanhazip.com/").text)
+    resp = proxyreq.get(url="http://google.com")
+    print(resp.content)

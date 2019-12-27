@@ -11,18 +11,19 @@ class ProxyGrabber:
             grabber = ProxyGrabber()
             grabber.collect_proxies()
     """
-    def __init__(self, max_workers=8):
+    def __init__(self, timeout=2000, max_workers=8):
         self.logger = logging.getLogger('pyhidentity')
         self.logger.info("create class ProxyGrabber")
 
         # create request session
+        self.timeout = timeout
         self.session = requests.Session()
         self.max_workers = max_workers
         self.proxy_types = {key: [] for key in ["http", "socks4", "socks5"]}
 
-        self.proxyscrape_http_url   = self.__define_proxyscrape_url(proxytype='http', timeout=2000, ssl='all', anonymity='all', country='all')
-        self.proxyscrape_socks4_url = self.__define_proxyscrape_url(proxytype='socks4', timeout=2000, ssl='all', anonymity='all', country='all')
-        self.proxyscrape_socks5_url = self.__define_proxyscrape_url(proxytype='socks5', timeout=2000, ssl='all', anonymity='all', country='all')
+        self.proxyscrape_http_url   = self.__define_proxyscrape_url(proxytype='http', timeout=self.timeout)
+        self.proxyscrape_socks4_url = self.__define_proxyscrape_url(proxytype='socks4', timeout=self.timeout)
+        self.proxyscrape_socks5_url = self.__define_proxyscrape_url(proxytype='socks5', timeout=self.timeout)
 
         # used
         self.free_proxy_url  = 'https://free-proxy-list.net/'
@@ -35,23 +36,21 @@ class ProxyGrabber:
         self.ssl_proxy_url       = 'https://sslproxies.org' # not
 
         self.proxy_urls = [
-            self.free_proxy_url,          # http
-            self.us_proxy_url,            # http
-            self.ip_address_url,          # http
-            self.socks_proxy_url,         # socks4
-            self.proxy_daily_url,         # http, socks4, socks5
+            #self.free_proxy_url,          # http
+            #self.us_proxy_url,            # http
+            #self.ip_address_url,          # http
+            #self.socks_proxy_url,         # socks4
+            #self.proxy_daily_url,         # http, socks4, socks5
             self.proxyscrape_http_url,    # http
             self.proxyscrape_socks4_url,  # socks4
             self.proxyscrape_socks5_url,  # socks5
         ]
 
-    def collect_proxies(self, type=None, number=None, random=False):
+    def collect_proxies(self, proxytype='all'):
         """ collects all proxies from url resources
 
-        :param type: type of proxies
-        :param number: number of proxies
-        :param random:
-        :return: proxy list as ip:port string
+        :param proxytype: type of proxies
+        :return: proxy dict as ip:port string
         """
         self.logger.info("collect proxies")
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
@@ -60,27 +59,34 @@ class ProxyGrabber:
                 url = future_to_url[future]
                 try:
                     resp = future.result()
-                    if (url in self.ip_address_url) and (type in (None, 'http')):
+                    if (url in self.ip_address_url) and (proxytype in ('all', 'http')):
                         proxies = self.__parse_ipadress(response=resp)
                         self.proxy_types['http'].extend(proxies)
-                    elif (url in self.proxy_daily_url) and (type in (None, 'http', 'socks4', 'socks5')):
+                    elif url in self.proxy_daily_url:
                         http, socks4, socks5 = self.__parse_proxy_daily(response=resp)
-                        self.proxy_types['http'].extend(http)  # TODO
-                        self.proxy_types['socks4'].extend(socks4)
-                        self.proxy_types['socks5'].extend(socks5)
-                    elif (url in (self.free_proxy_url, self.us_proxy_url)) and (type in (None, 'http')):
+                        if proxytype == 'http':
+                            self.proxy_types['http'].extend(http)
+                        elif proxytype == 'socks4':
+                            self.proxy_types['socks4'].extend(socks4)
+                        elif proxytype == 'socks5':
+                            self.proxy_types['socks5'].extend(socks5)
+                        else:
+                            self.proxy_types['http'].extend(http)
+                            self.proxy_types['socks4'].extend(socks4)
+                            self.proxy_types['socks5'].extend(socks5)
+                    elif (url in (self.free_proxy_url, self.us_proxy_url)) and (proxytype in ('all', 'http')):
                         proxies = self.__parse_free_proxy(response=resp)
                         self.proxy_types['http'].extend(proxies)
-                    elif (url in self.socks_proxy_url) and (type in (None, 'socks4')):
+                    elif (url in self.socks_proxy_url) and (proxytype in ('all', 'socks4')):
                         proxies = self.__parse_free_proxy(response=resp)
                         self.proxy_types['socks4'].extend(proxies)
-                    elif (url in self.proxyscrape_http_url) and (type in (None, 'http')):
+                    elif (url in self.proxyscrape_http_url) and (proxytype in ('all', 'http')):
                         proxies = self.__parse_proxyscrape(response=resp)
                         self.proxy_types['http'].extend(proxies)
-                    elif (url in self.proxyscrape_socks4_url) and (type in (None, 'socks4')):
+                    elif (url in self.proxyscrape_socks4_url) and (proxytype in ('all', 'socks4')):
                         proxies = self.__parse_proxyscrape(response=resp)
                         self.proxy_types['socks4'].extend(proxies)
-                    elif (url in self.proxyscrape_socks5_url) and (type in (None, 'socks5')):
+                    elif (url in self.proxyscrape_socks5_url) and (proxytype in ('all', 'socks5')):
                         proxies = self.__parse_proxyscrape(response=resp)
                         self.proxy_types['socks5'].extend(proxies)
                 except Exception as e:
@@ -132,34 +138,6 @@ class ProxyGrabber:
               '&country=%s'   % country
 
         return url
-
-    def get_anonymous_proxies(self):
-        """get a list of anonymous proxies
-
-        :return: list, ip:port as a string
-        """
-        return self.__parse_free_proxy(response=self.__load_url(self.anonymous_proxy_url))
-
-    def get_us_proxies(self):
-        """get a list of us proxies
-
-        :return: list, ip:port as a string
-        """
-        return self.__parse_free_proxy(response=self.__load_url(self.us_proxy_url))
-
-    def get_socks_proxies(self):
-        """get a list of socks proxies
-
-        :return: list, ip:port as a string
-        """
-        return self.__parse_free_proxy(response=self.__load_url(self.socks_proxy_url))
-
-    def get_ssl_proxies(self):
-        """get a list of ssl proxies
-
-        :return: list, ip:port as a string
-        """
-        return self.__parse_free_proxy(response=self.__load_url(url=self.ssl_proxy_url))
 
 ### parser ####
 
@@ -231,7 +209,8 @@ class ProxyGrabber:
 if __name__ == '__main__':
     import time
     start = time.time()
-    grabber = ProxyGrabber(max_workers=8)
+    grabber = ProxyGrabber(timeout=5000, max_workers=8)
+
     proxies = grabber.collect_proxies()
     print(proxies)
     print(len(proxies['http']))

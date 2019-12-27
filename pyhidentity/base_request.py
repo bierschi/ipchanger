@@ -34,6 +34,7 @@ class BaseRequest(ABC):
 
         """
         self.session.cookies.clear()
+        self.session.close()
 
     def get_current_ip(self):
         """get current ip address with a request to icanhazip service
